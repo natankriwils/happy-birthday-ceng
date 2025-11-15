@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Retro Music Player</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+  body {
+    margin: 0;
+    background-color: #000014;
+    font-family: 'Press Start 2P', monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .starfield {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: -1;
+    }
+
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.6;
+      animation: twinkle 5s ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.3); }
+    }
+
+  .frame {
+    background: #eaeaea;
+    border-radius: 20px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 348px;
+    height: 510px;
+    box-shadow: inset -4px -4px 6px #ccc, inset 4px 4px 6px #fff;
+    gap: 8px;
+    justify-content: flex-start;
+    z-index: 1;
+  }
+
+  .player {
+    background: linear-gradient(to bottom, #223322, #112211);
+    border: 4px solid #333;
+    width: 350px;
+    padding: 10px;
+    box-sizing: border-box;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    box-shadow: inset 0 0 10px #000;
+    height: 620px;
+  }
+
+  .player h1 {
+    font-size: 16px;
+    color: #00ff00;
+    text-align: center;
+    margin-bottom: 8px;
+    margin-top: 0;
+  }
+
+  .frame-box {
+    background-color: #2f3f49;
+    padding: 6px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    border-radius: 4px;
+  }
+
+  .cover {
+    width: 305px;
+    height: 150px;
+    border: 2px solid #333;
+    margin-bottom: 10px;
+  }
+
+  .track-info {
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  .track-title {
+    font-size: 10px;
+    color: #6bf84b;
+    margin-bottom: 2px;
+  }
+
+  .track-artist {
+    font-size: 8px;
+    color: #ffee00;
+  }
+
+  .time-info {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    font-size: 8px;
+    color: #6bf84b;
+    margin-bottom: 4px;
+  }
+
+  .progress-container {
+    width: 100%;
+    height: 4px;
+    background-color: #4f6370;
+    position: relative;
+    cursor: pointer;
+    border-radius: 2px;
+    margin-bottom: 8px;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background-color: #6bf84b;
+    width: 0%;
+    border-radius: 2px;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .progress-handle {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    background-color: #eaeaea;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 2;
+    transition: left 0.1s linear;
+  }
+
+  .round-controls-wrapper {
+    padding: 6px;
+    margin-bottom: 8px;
+    width: 100%;
+    background-color: #2f3f49;
+    box-sizing: border-box;
+    border-radius: 4px;
+  }
+
+  .round-controls {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+  gap: 18px;
+}
+
+.round {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #928d8d;
+  border-radius: 50%;
+  position: relative;
+}
+
+.center-round {
+  width: 45px;
+  height: 45px;
+  border: 3px solid #928d8d;
+ }
+
+.vinyl-center {
+  width: 20px;
+  height: 20px;
+  background: #928d8d;
+  border-radius: 50%;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.center-line {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 50px;
+  height: 2px;
+  background: #928d8d;
+  border-radius: 2px;
+  transform: translate(-50%, -50%);
+}
+
+.side-round {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #928d8d;
+  position: relative;
+}
+
+.side-line {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 34px;
+  height: 2px;
+  background: #928d8d;
+  border-radius: 2px;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes spin-center {
+  100% { transform: rotate(360deg); }
+}
+@keyframes spin-side {
+  100% { transform: rotate(360deg); }
+}
+
+.center-round.spin {
+  animation: spin-center 4.5s linear infinite;
+}
+.side-round.spin {
+  animation: spin-side 3.8s linear infinite;
+}
+
+  .controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 8px;
+    gap: 6px;
+  }
+
+  .controls button {
+    background: #2196f3;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    transition: background-color 0.2s ease-in-out;
+    
+  }
+
+  .controls button:hover {
+    background-color: #0d8ddb;
+  }
+
+  .controls svg {
+    fill: white;
+    width: 18px;
+    height: 18px;
+  }
+
+  .button-small {
+    width: 60px;
+    height: 34px;
+  }
+
+  .button-large {
+    width: 175px;
+    height: 34px;
+  }
+
+  .playlist {
+    background-color: #2f3f49;
+    font-size: 8px;
+    padding: 6px;
+    width: 100%;
+    height: 80px;
+    overflow-y: auto;
+    border-radius: 6px;
+    box-sizing: border-box;
+    color: #eaeaea;
+    margin-bottom: -2px;
+  }
+
+  .playlist h3 {
+    font-size: 10px;
+    color: #ffee00;
+    margin: 0 0 4px 0;
+  }
+
+  .playlist-item {
+    padding: 2px;
+    cursor: pointer;
+    color: #eaeaea;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .playlist-item:hover,
+  .playlist-item.active {
+    background-color: #4f6370;
+  }
+
+  .nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 340px;
+    height: 100px;
+    gap: 8px;
+  }
+
+  .next-button,
+  .back-button {
+    background-color: #00bc29;
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    flex: 1;
+    text-align: center;
+    font-weight: bold;
+  }
+
+  .back-button {
+    background-color: #d61702;
+  }
+
+  .next-button:hover {
+    background-color: #00e900;
+  }
+
+  .back-button:hover {
+    background-color: #ff3333;
+  }
+</style>
+
+</head>
+<body>
+  <audio id="clickSound" src="click.wav"></audio>
+
+  <div class="starfield"></div>
+
+  <div class="frame">
+    <div class="player">
+      <h1>Music Player</h1>
+      <div class="frame-box">
+        <img class="cover" id="cover" src="cover.jpg" alt="cover">
+        <div class="track-info">
+          <div class="track-title" id="trackTitle">Loading...</div>
+          <div class="track-artist" id="trackArtist"></div>
+        </div>
+        <div class="time-info">
+          <span id="currentTime">0:00</span>
+          <span id="duration">0:00</span>
+        </div>
+        <div class="progress-container" id="progressContainer">
+          <div class="progress-bar" id="progressBar"></div>
+          <div class="progress-handle" id="progressHandle"></div>
+        </div>
+      </div>
+
+      <div class="round-controls-wrapper">
+        <div class="round-controls">
+          <div class="round side-round">
+        <div class="side-line"></div>
+      </div>
+      <div class="round center-round">
+        <div class="vinyl-center"></div>
+        <div class="center-line"></div>
+      </div>
+      <div class="round side-round">
+        <div class="side-line"></div>
+      </div>
+    </div>
+  </div>
+
+      <div class="controls">
+        <button class="button-small" onclick="prevTrack(); playClickSound()">
+          <svg viewBox="0 0 24 24"><path d="M20 5v14l-12-7zM4 5h2v14H4z"/></svg>
+        </button>
+        <button class="button-large" id="playPause" onclick="togglePlay(); playClickSound()">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <button class="button-small" onclick="nextTrack(); playClickSound()">
+          <svg viewBox="0 0 24 24"><path d="M4 5v14l12-7zM20 5h-2v14h2z"/></svg>
+        </button>
+      </div>
+
+      <div class="playlist" id="playlist"></div>
+    </div> 
+
+    <div class="nav-buttons">
+      <button class="back-button" onclick="playClickSound(); goBack()">KEMBALI</button>
+      <button class="next-button" onclick="playClickSound(); goNext()">SELANJUTNYA</button>
+    </div>
+  </div> 
+
+  <audio id="audio"></audio>
+
+  <script>
+let currentTrack = 0;
+let isShuffle = false;
+let isRepeat = false;
+  const playlist = [
+    { title: "No. 1 Party Anthem", artist: "Arctic Monkeys", src: "Arctic Monkeys - No. 1 Party Anthem.mp3", cover: "no 1 party anthem.jpg" },
+    { title: "WILDFLOWER", artist: "Billie Eilish", src: "Billie Eilish - WILDFLOWER.mp3", cover: "wildflower.jpg" },
+    { title: "iris", artist: "goo goo dolls", src: "Goo Goo Dolls - iris.mp3", cover: "iris.jpg" },
+    { title: "Jodoh Pasti Bertemu", artist: "Afgan", src: "Afgan - Jodoh Pasti Bertemu.mp3", cover: "jodoh pasti bertemu.jpg" },
+    { title: "Seize The Day", artist: "Avenged Sevenfold", src: "Avenged Sevenfold - Seize The Day.mp3", cover: "seize the day.jpg" },
+    { title: "Sparks", artist: "Coldplay", src: "Coldplay - Sparks.mp3", cover: "sparks.jpg" },
+    { title: "Penyangkalan", artist: "For Revenge", src: "for Revenge - Penyangkalan.mp3", cover: "penyangkalan.jpg" },
+    { title: "Last Night on Earth", artist: "Green Day", src: "Green Day - Last Night on Earth.mp3", cover: "last night on earth.jpg" },
+    { title: "everything u are", artist: "Hindia", src: "Hindia - everything u are.mp3", cover: "everything u are.jpg" },
+    { title: "Summertime Sadness", artist: "Lana Del Rey", src: "Lana Del Rey - Summertime Sadness.mp3", cover: "summertime sadness.jpg" },
+    { title: "I WANNA BE YOUR SLAVE", artist: "Måneskin", src: "Måneskin - I WANNA BE YOUR SLAVE.mp3", cover: "i want be your slave.jpg" },
+    { title: "I Don't Love You", artist: "My Chemical Romance", src: "My Chemical Romance - I Don't Love You.mp3", cover: "i dont love you.jpg" },
+    { title: "If I Had A Gun", artist: "Noel Gallaghers", src: "Noel Gallaghers - If I Had A Gun.mp3", cover: "if i had a gun.jpg" },
+    { title: "The Only Exception", artist: "Paramore", src: "Paramore - The Only Exception.mp3", cover: "exeption.jpg" }
+  ];
+
+  const audio = document.getElementById("audio");
+  const progressBar = document.getElementById("progressBar");
+  const progressContainer = document.getElementById("progressContainer");
+  const playPauseBtn = document.getElementById("playPause");
+  const centerRound = document.querySelector('.center-round');
+  const sideRounds = document.querySelectorAll('.side-round');
+  const currentTimeEl = document.getElementById("currentTime");
+  const durationEl = document.getElementById("duration");
+  const handle = document.getElementById("progressHandle");
+
+  function loadTrack(index) {
+    const track = playlist[index];
+    audio.src = track.src;
+    document.getElementById("trackTitle").textContent = track.title;
+    document.getElementById("trackArtist").textContent = track.artist;
+    document.getElementById("cover").src = track.cover;
+    highlightPlaylist(index);
+  }
+
+  function playTrack() {
+  audio.play();
+  playPauseBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zm8 0h4v16h-4z"/></svg>';
+  centerRound.classList.add('spin');
+  sideRounds.forEach(el => el.classList.add('spin'));
+}
+
+function pauseTrack() {
+  audio.pause();
+  playPauseBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+  centerRound.classList.remove('spin');
+  sideRounds.forEach(el => el.classList.remove('spin'));
+}
+
+  function togglePlay() {
+    if (audio.paused) playTrack();
+    else pauseTrack();
+  }
+
+  function nextTrack() {
+    if (isShuffle) {
+      let next;
+      do {
+        next = Math.floor(Math.random() * playlist.length);
+      } while (next === currentTrack);
+      currentTrack = next;
+    } else {
+      currentTrack = (currentTrack + 1) % playlist.length;
+    }
+    loadTrack(currentTrack);
+    playTrack();
+  }
+
+  function prevTrack() {
+    currentTrack = (currentTrack - 1 + playlist.length) % playlist.length;
+    loadTrack(currentTrack);
+    playTrack();
+  }
+
+  function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+  audio.addEventListener("timeupdate", () => {
+    if (!isDragging) {
+      const progress = (audio.currentTime / audio.duration) * 100;
+      progressBar.style.width = progress + "%";
+      handle.style.left = progress + "%";
+    }
+    currentTimeEl.textContent = formatTime(audio.currentTime);
+    durationEl.textContent = formatTime(audio.duration);
+  });
+
+  audio.addEventListener("ended", () => {
+    if (isRepeat) {
+      audio.currentTime = 0;
+      playTrack();
+    } else {
+      nextTrack();
+    }
+  });
+
+  let isDragging = false;
+
+  handle.addEventListener("mousedown", () => {
+    isDragging = true;
+  });
+
+  document.addEventListener("mouseup", () => {
+    isDragging = false;
+  });
+
+  document.addEventListener("mousemove", (e) => {
+    if (isDragging) {
+      const rect = progressContainer.getBoundingClientRect();
+      const offsetX = e.clientX - rect.left;
+      const percent = Math.max(0, Math.min(1, offsetX / rect.width));
+      audio.currentTime = percent * audio.duration;
+    }
+  });
+
+  handle.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    isDragging = true;
+  });
+
+  document.addEventListener("touchend", () => {
+    isDragging = false;
+  });
+
+  document.addEventListener("touchmove", (e) => {
+    if (isDragging) {
+      const touch = e.touches[0];
+      const rect = progressContainer.getBoundingClientRect();
+      const offsetX = touch.clientX - rect.left;
+      const percent = Math.max(0, Math.min(1, offsetX / rect.width));
+      audio.currentTime = percent * audio.duration;
+    }
+  });
+
+  progressContainer.addEventListener("click", (e) => {
+    const width = progressContainer.clientWidth;
+    const clickX = e.offsetX;
+    const duration = audio.duration;
+    audio.currentTime = (clickX / width) * duration;
+  });
+
+  function highlightPlaylist(index) {
+    document.querySelectorAll(".playlist-item").forEach((el, i) => {
+      el.classList.toggle("active", i === index);
+    });
+  }
+
+  function buildPlaylist() {
+    const playlistContainer = document.getElementById("playlist");
+    playlistContainer.innerHTML = "<h3>PLAYLIST:</h3>";
+    playlist.forEach((track, index) => {
+      const div = document.createElement("div");
+      div.className = "playlist-item";
+      div.textContent = `${index + 1}. ${track.title}`;
+      div.onclick = () => {
+        currentTrack = index;
+        loadTrack(index);
+        playTrack();
+      };
+      playlistContainer.appendChild(div);
+    });
+  }
+
+  function goBack() {
+    window.location.href = "gallery.html";
+  }
+
+  function goNext() {
+    window.location.href = "game.html";
+  }
+
+  buildPlaylist();
+  loadTrack(currentTrack);
+
+  const starCount = 100;
+    const starfield = document.querySelector('.starfield');
+    for (let i = 0; i < starCount; i++) {
+      const star = document.createElement('div');
+      star.classList.add('star');
+      star.style.left = `${Math.random() * window.innerWidth}px`;
+      star.style.top = `${Math.random() * window.innerHeight}px`;
+      star.style.animationDuration = `${Math.random() * 4 + 4}s`;
+      star.style.animationDelay = `${Math.random() * 3}s`;
+      starfield.appendChild(star);
+    }
+
+    const clickSound = document.getElementById("clickSound");
+
+  function playClickSound() {
+    clickSound.currentTime = 0;
+    clickSound.play();
+  }
+
+</script>
+</body>
+</html>
