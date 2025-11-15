@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GameBoy Birthday Gift</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      background-color: #000014;
+      font-family: 'Courier New', monospace;
+      color: #0f0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .starfield {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.8;
+  animation: twinkle infinite alternate;
+}
+
+@keyframes twinkle {
+  0% { opacity: 0.2; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1.2); }
+}
+
+
+@keyframes twinkling {
+  0% { opacity: 0.8; }
+  100% { opacity: 0.3; }
+}
+
+.gameboy {
+  position: relative;
+  z-index: 1;
+}
+
+    .hidden {
+      display: none;
+    }
+
+    #loading-screen {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loading-frame {
+      border: 4px solid #0f0;
+      width: 400px;
+      height: 220px;
+      padding: 20px 20px 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px #135804;
+      width: 380px;
+      box-sizing: border-box;
+    }
+
+    .loading-content {
+      text-align: center;
+      min-height: 180px;
+    }
+
+    .boot-text1 {
+      font-family: 'Press Start 2P', cursive; 
+      font-size: 16px;
+      margin-bottom: 22px;
+    }
+
+    .boot-text2 {
+      font-family: 'Press Start 2P', cursive; 
+      font-size: 10px;
+      margin-bottom: 22px;
+      min-height: 18px;
+    }
+
+    .loading-bar {
+      width: 300px;
+      height: 20px;
+      border: 2px solid #0f0;
+      background-color: #111;
+      position: relative;
+      margin: auto;
+    }
+
+    .loading-fill {
+      height: 100%;
+      width: 0%;
+      background-color: #0f0;
+      transition: width 0.3s ease-in-out;
+    }
+
+    .smile-text {
+      font-family: 'Press Start 2P';
+      font-size: 10px;
+      margin-top: 12px;
+      color: rgb(255, 238, 0);
+      animation: pulse 1.3s cubic-bezier(0.4,0,0.2,1) infinite;
+    }
+
+    @keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.06); opacity: 0.85; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+    #main-content {
+      background: #eaeaea;
+      border-radius: 20px;
+      padding: 80px 20px 30px;
+      width: 320px;
+      box-shadow: inset -4px -4px 6px #ccc, inset 4px 4px 6px #fff;
+      position: relative;
+      text-align: center;
+    }
+
+    .power-indicator {
+      color: red;
+      font-size: 10px;
+      position: absolute;
+      top: 10px;
+      left: 20px;
+    }
+
+    .title {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 10px;
+      color: #333;
+    }
+
+    .screen {
+      background: linear-gradient(to bottom, #223322, #112211);
+      color: #8aff70;
+      padding: 20px 10px;
+      border-radius: 10px;
+      text-align: center;
+      margin-top: -50px;
+      font-size: 14px;
+      box-shadow: inset 0 0 10px #000;
+      border: 4px solid #333;
+    }
+
+    .birthday-text {
+  font-size: 20px;
+  font-weight: bold;
+  color: #6bf84b;
+  font-family: 'Press Start 2P', cursive;
+  line-height: 1.5;
+}
+
+    .screen small {
+      display: block;
+      margin-top: 10px;
+      color: #999;
+      font-size: 8px;
+    }
+
+    .buttons-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 20px 0 10px;
+    }
+
+    .btn {
+      padding: 10px;
+      font-size: 10px;
+      border-radius: 5px;
+      font-weight: bold;
+      border: 2px solid #000;
+      text-shadow: 1px 1px #000;
+    }
+
+    .btn-blue { background: #0099ff; color: white; }
+    .btn-red { background: #ff1900; color: white; }
+    .btn-purple { background: #b700ff; color: white; }
+    .btn-green { background: #08e463; color: white; }
+
+.dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 20px);
+  grid-template-rows: repeat(3, 20px);
+  gap: 3px;
+  justify-content: flex-start;
+  padding-left: 30px;
+  margin: 20px 0 0 0;
+}
+
+.dpad div {
+  width: 20px;
+  height: 20px;
+}
+
+.dpad .center {
+  background: #666;
+  border-radius: 2px;
+}
+
+.dpad .up,
+.dpad .down,
+.dpad .left,
+.dpad .right {
+  background: #333;
+  border-radius: 2px;
+}
+
+.dpad .up:hover,
+.dpad .down:hover,
+.dpad .left:hover,
+.dpad .right:hover,
+.dpad .center:hover {
+  background: #888;
+  cursor: pointer;
+}
+
+.vertical {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 10px;
+  color: white;
+  line-height: 1;
+}
+
+.dpad .empty {
+  background: transparent;
+}
+
+    .dpad .center { background: #666; }
+
+  .ab-buttons {
+  position: absolute;
+  right: 50px;
+  bottom: 170px;
+  display: flex;
+  gap: 20px;
+}
+
+
+.ab-buttons .ab:first-child {
+  transform: rotate(-20deg);
+}
+
+.ab-buttons .ab:last-child {
+  transform: rotate(20deg);
+}
+
+    .ab-buttons .ab {
+      background: #ec1b04;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-left: 15px;
+      box-shadow: inset -2px -2px 3px #c0392b, inset 2px 2px 3px #f1948a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 10px;
+      color: white;
+    }
+
+    .start-select {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 100px;
+    }
+
+    .start-select div {
+  background: #555;
+  color: white;
+  padding: 6px 14px;
+  font-size: 9px;
+  border-radius: 5px;
+  box-shadow: inset -1px -1px 2px #333, inset 1px 1px 2px #777;
+  transition: background 0.3s, transform 0.2s;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.start-select div:hover {
+  background: #888;
+  transform: scale(1.1);
+}
+
+.fix-rotate {
+  display: inline-block;
+  transform: rotate(20deg); 
+}
+
+.ab-buttons .ab:first-child .fix-rotate {
+  transform: rotate(20deg); 
+}
+
+.ab-buttons .ab:last-child .fix-rotate {
+  transform: rotate(-20deg); 
+}
+
+.dpad .up::before {
+  content: "↑";
+}
+
+.dpad .down::before {
+  content: "↓";
+}
+
+.dpad .left::before {
+  content: "←";
+}
+
+.dpad .right::before {
+  content: "→";
+}
+
+.dpad .up,
+.dpad .down,
+.dpad .left,
+.dpad .right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: monospace;
+  font-size: 10px;
+  color: white;
+}
+ 
+#tap-to-start-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 4vw; 
+  color: #0f0;
+  text-align: center;
+  padding: 20px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.tap-to-start-pulse {
+  display: inline-block;
+  animation: pulse 1.3s cubic-bezier(0.4,0,0.2,1) infinite;
+}
+
+.press-start-pulse {
+  display: inline-block;
+  animation: pulse 1.3s cubic-bezier(0.4,0,0.2,1) infinite;
+}
+
+.frame {
+      background: #eaeaea;
+      border-radius: 20px;
+      padding: 20px 20px 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 360px;
+      height: 180px;
+      box-shadow: inset -4px -4px 6px #ccc, inset 4px 4px 6px #fff;
+      gap: 80px;
+    }
+
+    .fade {
+      transition: opacity 0.22s cubic-bezier(0.4,0,0.2,1);
+      opacity: 1;
+    }
+
+    .fade-out {
+      opacity: 0 !important;
+      pointer-events: none;
+      transition: opacity 0.22s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .fade-in {
+      opacity: 1;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div id="tap-to-start-overlay" class="fade"
+  style="
+    position: fixed;
+    inset: 0;
+    background: #333;
+    z-index: 9999;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  ">
+  <div style="
+    background: #eaeaea;
+    border-radius: 10px;
+    padding: 30px 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    text-align: center;
+    min-width: 280px;
+  ">
+    <h2 style="margin-bottom: 20px; font-size: 22px; color: #333;">Apa nama bunga dari buket ini?</h2>
+    <form id="password-form">
+      <input id="password-input" type="text" placeholder="Ketik di sini..." autocomplete="off"
+        style="padding: 10px 15px; width: 90%; border: 2px solid #333; border-radius: 5px; font-size: 16px; margin-bottom: 15px; outline: none;" />
+      <button type="submit"
+        style="padding: 10px 25px; background-color: #007acc; border: none; color: white; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px;">
+        Enter
+      </button>
+      <div id="password-error" style="color: #c00; font-size: 14px; margin-top: 12px; min-height: 18px;"></div>
+    </form>
+  </div>
+</div>
+
+  <div class="starfield"></div>
+  <div id="loading-screen">
+    <div class="loading-frame">
+      <div class="loading-content">
+        <p class="boot-text1">- GameBoy -</p>
+        <p class="boot-text2" id="loading-text"> > Preparing Birthday Surprise...</p>
+        <div class="loading-bar">
+          <div class="loading-fill" id="loading-fill"></div>
+        </div>
+        <audio id="click-sound" src="click.wav" preload="auto"></audio>
+        <audio id="startup-sound" src="gameboy-startup.mp3" preload="auto"></audio>
+        <p class="smile-text" id="smile-text">SMILE!</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="main-content" class="hidden">
+    <div class="power-indicator">POWER</div>
+    <div class="title">- GameBoy -</div>
+    <div class="screen">
+      <div class="birthday-text">Happy<br>Birthday!</div>
+      <div><span class="press-start-pulse" style="font-weight: bold; color: #ffff00; font-size: 14px;">Press Start Button</span></div>
+      <small>DOT MATRIX WITH STEREO SOUND</small>
+    </div>
+
+    <div class="buttons-grid">
+      <button class="btn btn-blue">MESSAGE</button>
+      <button class="btn btn-red">GALLERY</button>
+      <button class="btn btn-purple">MUSIC</button>
+      <button class="btn btn-green">TETRIS</button>
+    </div>
+
+    <div class="dpad">
+  <div class="empty"></div>
+  <div class="up"></div>
+  <div class="empty"></div>
+  <div class="left"></div>
+  <div class="center"></div>
+  <div class="right"></div>
+  <div class="empty"></div>
+  <div class="down"></div>
+  <div class="empty"></div>
+</div>
+
+<div class="ab-buttons">
+  <div class="ab"><span class="vertical fix-rotate">A</span></div>
+  <div class="ab"><span class="vertical fix-rotate">B</span></div>
+</div>
+
+  <div class="start-select">
+  <div>SELECT</div>
+  <div id="start-button" style="cursor: pointer;">START</div>
+</div>
+
+  <script>
+  const ANSWERS = ['jasmine', 'melati', 'bunga jasmine', 'bunga melati']; 
+  const overlay = document.getElementById('tap-to-start-overlay');
+  const form = document.getElementById('password-form');
+  const input = document.getElementById('password-input');
+  const errorDiv = document.getElementById('password-error');
+
+
+form.addEventListener('submit', function(e) {
+  e.preventDefault();
+  if (ANSWERS.includes(input.value.trim().toLowerCase())) {
+    overlay.classList.add('fade-out');
+    // Sembunyikan loading screen selama transisi
+    const loadingScreen = document.getElementById('loading-screen');
+    loadingScreen.style.display = 'flex';
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      startLoading();
+    }, 600); 
+  } else {
+    errorDiv.textContent = 'Jawaban salah!';
+    input.value = '';
+    input.focus();
+  }
+});
+
+  input.focus();
+
+  function startLoading() {
+    let width = 0;
+    const fill = document.getElementById('loading-fill');
+    const loadingText = document.getElementById('loading-text');
+    const smileText = document.getElementById('smile-text');
+    const startupSound = document.getElementById('startup-sound');
+    const interval = setInterval(() => {
+      if (width >= 100) {
+        clearInterval(interval);
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('main-content').classList.remove('hidden');
+      } else {
+        width += 2.3;
+        fill.style.width = width + '%';
+        if (width >= 90 && !window.readySoundPlayed) {
+          loadingText.textContent = ' > Ready!';
+          startupSound.currentTime = 0;
+          startupSound.play();
+          window.readySoundPlayed = true;
+        }
+      }
+    }, 90);
+  }
+
+  const fill = document.getElementById('loading-fill');
+  const loadingText = document.getElementById('loading-text');
+  const smileText = document.getElementById('smile-text');
+  const startupSound = document.getElementById('startup-sound');
+  const clickSound = document.getElementById('click-sound');
+  let width = 0;
+
+
+
+  const starCount = 100;
+  const starfield = document.querySelector('.starfield');
+  for (let i = 0; i < starCount; i++) {
+    const star = document.createElement('div');
+    star.classList.add('star');
+    const x = Math.random() * window.innerWidth;
+    const y = Math.random() * window.innerHeight;
+    star.style.left = `${x}px`;
+    star.style.top = `${y}px`;
+    star.style.animationDuration = `${Math.random() * 2 + 1}s`;
+    starfield.appendChild(star);
+  }
+
+  document.querySelectorAll(
+    'button, .ab, .start-select div, .dpad .up, .dpad .down, .dpad .left, .dpad .right, .dpad .center'
+  ).forEach(btn => {
+    btn.addEventListener('click', () => {
+      clickSound.currentTime = 0;
+      clickSound.play();
+    });
+  });
+
+  document.getElementById('start-button').addEventListener('click', () => {
+    clickSound.currentTime = 0;
+    clickSound.play();
+    setTimeout(() => {
+      window.location.href = 'message.html';
+    }, 300);
+  });
+</script>
+
+</body>
+</html>
