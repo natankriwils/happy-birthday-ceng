@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gallery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100%;
+      font-family: 'Press Start 2P', cursive;
+      height: 100vh;
+      width: 100vw;
+      background: #000014;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .frame {
+      background: #eaeaea;
+      border-radius: 20px;
+      padding: 20px 20px 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 380px;
+      height: 540px;
+      box-shadow: inset -4px -4px 6px #ccc, inset 4px 4px 6px #fff;
+      gap: 60px;
+      justify-content: space-between;
+      z-index: 1;
+    }
+
+    .gallery-box {
+      background: linear-gradient(to bottom, #223322, #112211);
+      border: 4px solid #333;
+      border-radius: 20px;
+      box-shadow: inset 0 0 10px #000;
+      padding: 16px;
+      width: 350px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      height: 560px;
+    }
+
+    .header-bar {
+      background: #2f3f49;
+      color: gold;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      border-radius: 4px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      background: red;
+      border-radius: 50%;
+    }
+
+    .indicator1 {
+      width: 10px;
+      height: 10px;
+      background: limegreen;
+      border-radius: 50%;
+    }
+
+    .gallery-title {
+      text-align: center;
+      color: #00ff00;
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    .printer-slot-bar {
+      width: 100%;
+      height: 20px;
+      background-color: #344550; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      margin-top: 5px;
+    }
+
+    .inner-slot-bar {
+      width: 80%;
+      height: 6px;
+      background-color: #111; 
+      border-radius: 4px;
+    }
+
+    .screen {
+      flex: 1;
+      background: #111;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      justify-content: flex-start;
+      box-shadow: 0 0 10px #181d20 inset;
+      color: #444;
+    }
+
+.screen.centered {
+  justify-content: center; 
+}
+
+.screen-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: auto 0; 
+}
+
+    .screen p {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .print-button {
+      background: red;
+      color: white;
+      font-size: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+      text-shadow: 1px 1px 0 #000;
+    }
+
+    .nav-buttons {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      gap: 10px;
+      margin-top: -50px;
+      margin-bottom: -14px;
+    }
+
+    .next-button,
+    .back-button {
+      background-color: #00bc29;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      flex: 1;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .back-button {
+      background-color: #d61702;
+    }
+
+    .next-button:hover {
+      background-color: #00e900;
+    }
+
+    .back-button:hover {
+      background-color: #ff3333;
+    }
+
+    @media (max-width: 480px) {
+  .next-button,
+  .back-button {
+    font-size: 16px !important;
+    padding: 14px px !important;
+  }
+}
+
+     .photo-output {
+  width: 100%;
+  max-height: 250px;
+  max-width: 250px;
+  object-fit: contain;
+  border-radius: 0px;
+  background: #000;
+  margin-bottom: 30px;
+  display: block;
+  clip-path: inset(100% 0 0 0);
+  animation: revealPhoto 5s linear forwards;
+}
+
+@keyframes revealPhoto {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0); 
+  }
+}
+
+.photo-wrapper {
+  width: 220px;
+  margin-top: 0px;
+  margin-bottom: -70px;
+  position: relative;
+  padding: 5px;
+  border-radius: 8px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  height: auto;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-bottom: 40px;
+}
+
+@media (max-width: 480px) {
+  .photo-wrapper {
+    max-height: 200px;
+  }
+}
+
+.photo-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+#printedPhoto {
+  width: 100%;
+  max-width: 100%;
+  height: auto; 
+  margin-bottom: 8px;
+  border-radius: 8px;
+}
+
+#progressText {
+  color: gold;
+  font-size: 10px;
+  margin-top: 8px;
+  margin-bottom: 16px;
+  text-align: center;
+  transform: translateY(-6px); 
+}
+
+.laser-line {
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: red;
+  box-shadow: 0 0 10px red;
+  z-index: 2;
+  opacity: 0;
+  position: absolute;
+}
+
+.printer-slot {
+      width: 100%;
+      height: 35px;
+      background-color: #293842;
+      border-radius: 4px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: -5px;
+    }
+
+    .printer-indicators {
+      display: flex;
+      gap: 10px;
+    }
+
+    .indicator2 {
+      width: 30px;
+      height: 10px;
+      background-color: #111;
+      border-radius: 5px;
+      box-shadow: inset 0 0 4px #000;
+    }
+
+@keyframes laserMove {
+  from {
+    top: 0;
+    opacity: 1;
+  }
+  to {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+    @media (max-width: 480px) {
+      .gallery-box {
+        padding: 16px;
+        height: 92vh;
+      }
+
+      .gallery-title {
+        font-size: 16px;
+      }
+
+      .print-button {
+        font-size: 9px;
+        padding: 10px 18px !important;
+      }
+
+      .next-button,
+      .back-button {
+        font-size: 12px;
+        padding: 8px;
+      }
+
+      .header-bar {
+        font-size: 10px;
+      }
+    }
+
+    #screenText {
+  font-size: 16px; 
+  margin: 4px 0;   
+  padding: 0;
+  height: auto;
+  line-height: 1.2;
+  text-align: center;
+  width: 100%;  
+}
+
+#photoContainer > div {
+  margin-bottom: 40px; 
+}
+
+@media (max-width: 480px) and (max-height: 700px) {
+  .gallery-box {
+    height: 96vh;
+    padding: 12px;
+    max-width: 100%;
+  }
+
+  .screen {
+    padding: 10px;
+    max-height: 55vh;
+  }
+
+  .photo-wrapper {
+    height: 160px;
+  }
+
+  #progressText {
+    font-size: 9px;
+    margin-top: 4px;
+    margin-bottom: 12px;
+  }
+
+  .print-button {
+    font-size: 8px;
+    padding: 6px 10px;
+  }
+
+  .next-button, .back-button {
+    font-size: 11px;
+    padding: 8px 12px;
+  }
+
+  .gallery-title {
+    font-size: 14px;
+  }
+
+  .header-bar {
+    font-size: 9px;
+    padding: 6px;
+  }
+
+  #screenText {
+    font-size: 12px;
+  }
+
+  .photo-output {
+    max-height: 180px;
+  }
+}
+
+    .video-frame-label {
+  font-size: 12px;
+  color: yellow;
+  margin-top: 6px;
+  font-family: 'Press Start 2P', cursive;
+}
+
+#reprintButtonWrapper {
+  position: fixed;
+  bottom: 16px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  z-index: 1000;
+}
+
+#reprintButtonWrapper .next-button {
+  font-size: 12px;
+  padding: 10px 20px;
+}
+
+.close-button {
+  position: absolute;
+  top: 12px;
+  right: 20px;
+  font-size: 18px;
+  color: white;
+  background-color: red;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  text-align: center;
+  cursor: pointer;
+  z-index: 1001;
+  font-family: Arial, sans-serif;
+  box-shadow: 0 0 4px rgba(0,0,0,0.5);
+  transition: background-color 0.2s;
+}
+
+.close-button:hover {
+  background-color: darkred;
+}
+
+#playOverlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1001;
+  pointer-events: auto;
+}
+
+#playOverlay.hidden {
+  opacity: 0.1; 
+  pointer-events: auto;
+}
+
+#modalVideo {
+  pointer-events: auto;
+  z-index: 10;
+  position: relative;
+}
+
+.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+video::-webkit-media-controls-start-playback-button {
+  display: none !important;
+}
+
+@media (max-width: 600px), (pointer: coarse) {
+  #playOverlay {
+    display: none !important;
+  }
+}
+
+  </style>
+</head>
+<body>
+<canvas id="starfield"></canvas>
+
+  <div class="frame">
+    <div class="gallery-box">
+      <div class="gallery-title">Gallery</div>
+      <div class="header-bar">
+        <div class="dot"></div>
+        <div>PHOTOBOX</div>
+        <div class="indicator1"></div>
+      </div>
+      <div class="printer-slot-bar">
+        <div class="inner-slot-bar"></div>
+      </div>
+      <div class="screen centered" id="screen">
+        <div class="screen-content" id="screenContent">
+          <p id="screenText">Photobox siap digunakan</p>
+          <button class="print-button" id="printBtn" onclick="startPrint()">MULAI CETAK</button>
+          <div class="photo-wrapper" id="photoWrapper" style="display: none;">
+            <div id="photoContainer"></div>
+          </div>
+          <p id="progressText" style="color: gold; font-size: 10px; margin-top: 25px; margin-bottom: 20px; text-align: center;"></p>
+        </div>
+      </div>
+      <div class="printer-slot">
+        <div class="printer-indicators">
+          <div class="indicator2"></div>
+          <div class="indicator2"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="back-button" onclick="goBack()">KEMBALI</button>
+      <button class="next-button" onclick="goNext()">SELANJUTNYA</button>
+    </div>
+  </div>
+
+  <div id="photoModal" style="display:none; position:fixed; z-index:999; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); align-items:center; justify-content:center;">
+    <span class="close-button" onclick="closePhotoModal()">×</span>
+    <img id="modalImage" src="" style="max-width:90%; max-height:90%; border:6px solid white; border-radius:8px;" />
+  </div>
+
+<div id="videoModal" style="display:none; position:fixed; z-index:999; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); align-items:center; justify-content:center;">
+  <video
+    id="modalVideo"
+    src="video.mp4"
+    style="width: 90vw; max-width: 480px; max-height: 80vh; border:6px solid white; border-radius:8px;"
+    playsinline
+    muted
+  ></video>
+
+  <div id="playOverlay" onclick="toggleVideoPlay(event)" style="
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    width:60px;
+    height:60px;
+    background:rgba(255,255,255,0.6);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    z-index:1001;
+  ">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="black"><path d="M8 5v14l11-7z"/></svg>
+  </div>
+
+  <span class="close-button" onclick="closeVideoModal()" style="
+    position:absolute;
+    top:10px;
+    right:10px;
+    background:red;
+    color:white;
+    border-radius:50%;
+    width:30px;
+    height:30px;
+    text-align:center;
+    line-height:30px;
+    font-weight:bold;
+    font-family:sans-serif;
+    z-index:1001;
+    cursor:pointer;
+  ">×</span>
+</div>
+
+<script>
+  const videoModal = document.getElementById('videoModal');
+  const modalVideo = document.getElementById('modalVideo');
+  const playOverlay = document.getElementById("playOverlay");
+  const clickSound = new Audio('click.wav');
+  const printSound = new Audio('print.mp3');
+  const photoModal = document.getElementById('photoModal');
+  const modalImage = document.getElementById('modalImage');
+  const photoList = ['photo1.jpg', 'photo2.jpg', 'photo3.jpg'];
+  const screen = document.getElementById('screen');
+  const screenText = document.getElementById('screenText');
+  const printBtn = document.getElementById('printBtn');
+  const photoWrapper = document.getElementById('photoWrapper');
+  const photoContainer = document.getElementById('photoContainer');
+  const progressText = document.getElementById('progressText');
+
+  function addClickSoundToButtons() {
+  document.querySelectorAll("button:not(.back-button):not(.next-button)").forEach(button => {
+    button.removeEventListener("click", playClickSound);
+    button.addEventListener("click", playClickSound);
+  });
+}
+
+  function playClickSound() {
+    clickSound.currentTime = 0;
+    clickSound.play().catch(e => console.log("Playback error:", e));
+  }
+  addClickSoundToButtons();
+
+  screen.classList.add('centered');
+
+  async function startPrint() {
+    screen.classList.add('centered');
+    screenText.textContent = 'Menyiapkan photobox...';
+    printBtn.style.display = 'none';
+    photoWrapper.style.display = 'none';
+    progressText.textContent = '';
+    document.getElementById("screenContent").classList.add("loading-only");
+
+    await new Promise(r => setTimeout(r, 500));
+
+    screen.classList.remove('centered');
+    document.getElementById("screenContent").classList.remove("loading-only");
+
+    screenText.textContent = '';
+    photoWrapper.style.display = 'block';
+    photoWrapper.style.height = 'auto';
+    photoWrapper.style.maxHeight = '300px';
+    photoWrapper.style.overflowY = 'auto';
+    photoContainer.innerHTML = '';
+    progressText.textContent = '';
+
+    await new Promise(r => setTimeout(r, 800));
+
+    for (let i = 0; i < photoList.length; i++) {
+      screenText.textContent = '';
+      await new Promise(r => setTimeout(r, 1000));
+
+      const photoGroup = document.createElement('div');
+      photoGroup.style.position = 'relative';
+
+      const newLaser = document.createElement('div');
+      newLaser.className = 'laser-line';
+      newLaser.style.animation = 'laserMove 5s linear forwards';
+
+      const newPhoto = document.createElement('img');
+      newPhoto.src = photoList[i];
+      newPhoto.className = 'photo-output';
+      newPhoto.addEventListener('click', () => openPhotoModal(photoList[i]));
+
+      photoGroup.appendChild(newLaser);
+      photoGroup.appendChild(newPhoto);
+      photoContainer.appendChild(photoGroup);
+
+      setTimeout(() => {
+        photoWrapper.scrollTo({
+          top: photoWrapper.scrollHeight + window.innerHeight / 2,
+          behavior: "smooth"
+        });
+      }, 100);
+
+      printSound.currentTime = 0;
+      printSound.play();
+
+      for (let percent = 0; percent <= 100; percent += 5) {
+        progressText.textContent = `Mencetak foto ${i + 1} dari ${photoList.length}... (${percent}%)`;
+        await new Promise(r => setTimeout(r, 250));
+      }
+
+      await new Promise(r => setTimeout(r, 300));
+    }
+
+    const videoGroup = document.createElement('div');
+    videoGroup.style.position = 'relative';
+    videoGroup.style.textAlign = 'center';
+    videoGroup.style.background = '#000';
+    videoGroup.style.padding = '10px';
+    videoGroup.style.marginBottom = '10px';
+
+    const videoThumbnail = document.createElement('div');
+    videoThumbnail.style.cursor = 'pointer';
+
+    const videoCover = document.createElement('img');
+    videoCover.src = 'video-thumbnail.jpg';
+    videoCover.style.width = '100%';
+    videoThumbnail.appendChild(videoCover);
+
+    videoThumbnail.addEventListener('click', () => openVideoModal("video.mp4"));
+
+    const videoLabel = document.createElement('div');
+    videoLabel.style.color = '#ff0';
+    videoLabel.style.marginTop = '6px';
+    videoLabel.innerHTML = ``;
+
+    videoGroup.appendChild(videoThumbnail);
+    videoGroup.appendChild(videoLabel);
+    photoContainer.appendChild(videoGroup);
+
+    setTimeout(() => {
+      photoWrapper.scrollTo({
+        top: photoWrapper.scrollHeight + window.innerHeight / 2,
+        behavior: "smooth"
+      });
+    }, 300);
+
+    progressText.textContent = "";
+
+    const reprintButton = document.createElement('button');
+    reprintButton.textContent = "CETAK ULANG";
+    reprintButton.className = "next-button";
+    reprintButton.style.marginTop = "8px";
+    reprintButton.onclick = startPrint;
+
+    const reprintWrapper = document.createElement('div');
+    reprintWrapper.style.textAlign = "center";
+    reprintWrapper.style.marginBottom = "10px";
+    reprintWrapper.appendChild(reprintButton);
+    photoContainer.appendChild(reprintWrapper);
+
+    addClickSoundToButtons();
+  }
+
+  function openPhotoModal(src) {
+    modalImage.src = src;
+    photoModal.style.display = 'flex';
+  }
+
+  function closePhotoModal() {
+    photoModal.style.display = 'none';
+  }
+
+  photoModal.addEventListener('click', () => closePhotoModal());
+
+  function openVideoModal(src) {
+    modalVideo.src = src;
+    modalVideo.setAttribute('controls', 'controls');
+    videoModal.style.display = 'flex';
+    playOverlay.classList.remove("hidden");
+  }
+
+  function toggleVideoPlay(event) {
+  event.stopPropagation(); 
+  const video = document.getElementById('modalVideo');
+  const overlay = document.getElementById('playOverlay');
+
+  if (video.paused || video.ended) {
+    video.play();
+    overlay.classList.add("hidden");
+  } else {
+    video.pause();
+    overlay.classList.remove("hidden");
+  }
+}
+
+  function closeVideoModal() {
+    videoModal.style.display = 'none';
+    modalVideo.pause();
+    modalVideo.currentTime = 0;
+    playOverlay.classList.remove("hidden");
+  }
+
+  modalVideo.addEventListener("pause", function () {
+    playOverlay.classList.remove("hidden");
+  });
+  modalVideo.addEventListener("play", function () {
+    playOverlay.classList.add("hidden");
+  });
+
+  videoModal.addEventListener('click', function (event) {
+    if (event.target === videoModal) {
+      closeVideoModal();
+    }
+  });
+
+  function goBack() {
+  clickSound.currentTime = 0;
+  clickSound.play();
+  setTimeout(() => {
+    window.location.href = "message.html";
+  }, 120);
+}
+
+  function goNext() {
+  clickSound.currentTime = 0;
+  clickSound.play();
+  setTimeout(() => {
+    window.location.href = "music.html";
+  }, 120);
+}
+
+  const canvas = document.getElementById("starfield");
+  const ctx = canvas.getContext("2d");
+  let stars = [];
+  const numStars = 100;
+
+  function initStars() {
+    stars = [];
+    for (let i = 0; i < numStars; i++) {
+      stars.push({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        radius: Math.random() * 1.2,
+        alpha: Math.random(),
+        delta: Math.random() * 0.02
+      });
+    }
+  }
+
+  function drawStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let star of stars) {
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.radius, 0, 2 * Math.PI);
+      ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+      ctx.fill();
+      star.alpha += star.delta;
+      if (star.alpha <= 0 || star.alpha >= 1) {
+        star.delta = -star.delta;
+      }
+    }
+  }
+
+  function animate() {
+    drawStars();
+    requestAnimationFrame(animate);
+  }
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    initStars();
+  }
+
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+  animate();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Block Game</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+  max-width: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000014;
+      color: #0f0;
+      font-family: 'Press Start 2P', monospace;
+      width: 100vw;
+      height: 100vh;
+      min-width: 100vw;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    #starfield {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      display: block;
+    }
+
+    .gameboy-frame {
+      background: #eaeaea;
+      border-radius: 20px;
+      box-shadow: inset -4px -4px 6px #ccc, inset 4px 4px 6px #fff;
+      width: 380px;
+      height: 540px;
+      padding: 20px 20px 30px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: visible;
+      border: none;
+      z-index: 1;
+      gap: 0;
+      justify-content: flex-start;
+    }
+
+    .header {
+      text-align: center;
+      margin-top: 6px;
+      margin-bottom: 8px;
+      z-index: 3;
+      position: relative;
+    }
+
+    .header h1 {
+      font-size: 16px;
+      margin: -2px;
+      color: #00ff00;
+      text-align: center;
+    }
+
+    .scoreboard {
+      display: flex;
+      justify-content: space-between;
+      width: 90%;
+      font-size: 10px;
+      margin: 8px 0 4px 0;
+      color: #ffee00;
+      z-index: 3;
+      position: relative;
+    }
+
+    .screen {
+      background: linear-gradient(to bottom, #223322, #112211);
+      border: 4px solid #333;
+      border-radius: 20px;
+      box-shadow: inset 0 0 10px #000;
+      width: 350px;
+      height: 440px;
+      margin: 0 auto 8px auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      position: relative;
+      padding: 10px 0 0 0;
+      padding-top: -2px;
+      margin-top: 4px;
+      z-index: 3;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      grid-template-rows: repeat(8, 1fr);
+      gap: 2px;
+      min-width: 310px;
+      max-width: 310px;
+      min-height: 290px;
+      max-height: 290px;
+      background: #000014;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px #1a1a2a inset;
+      touch-action: none;
+      border: 2px solid #333;
+    }
+
+    .cell {
+      background: #000014;
+      width: 100%;
+      height: 100%;
+      border: 1px solid #4f6370;
+      box-shadow: 0 1px 2px #1a1a2a inset;
+      border-radius: 3px;
+      transition: background 0.2s;
+    }
+
+    .block-area {
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-end;
+      margin-top: 4px;
+      min-height: 60px;
+      position: relative;
+      padding-bottom: 6px;
+      z-index: 3;
+      overflow: hidden;
+    }
+
+    .draggable-block {
+      position: relative;
+      display: grid;
+      grid-gap: 2px;
+      cursor: grab;
+      z-index: 10;
+      margin: 0 2px;
+      box-shadow: 0 3px 0 #333;
+      transition: box-shadow 0.2s, transform 0.2s;
+      user-select: none;
+      width: max-content;
+      height: max-content;
+    }
+
+    .block-cell {
+      width: 16px;
+      height: 16px;
+      border-radius: 2px;
+      margin: -0.5px;
+      box-shadow: 0 1px 2px #000014 inset;
+      background: #ffee00;
+      border: 2px solid #333;
+      transition: background 0.2s;
+    }
+
+    .block-pink {
+      background: #FF3CAC !important;
+      border: 2px solid #444 !important;
+    }
+    .block-red {
+      background: #FF4C4C !important;
+      border: 2px solid #444 !important;
+    }
+
+    .block-blue {
+      background: #00F0FF !important;
+      border: 2px solid #444 !important;
+    }
+
+    .block-green {
+      background: #39FF14 !important;
+      border: 2px solid #444 !important;
+    }
+
+    .block-yellow {
+      background: #FFFC33 !important;
+      border: 2px solid #444 !important;
+    }
+
+    .back-btn {
+      background: #d61702;
+      color: white;
+      font-size: 12px;
+      margin-top: 10px;
+      padding: 10px 0;
+      border: none;
+      width: 90%;
+      font-family: 'Press Start 2P', monospace;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 1px 0 #333;
+      letter-spacing: 1px;
+      font-weight: bold;
+      z-index: 3;
+      position: relative;
+    }
+    
+    .game-over-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      pointer-events: auto;
+    }
+
+    .game-over-box {
+      background: #161616f3;
+      border: 5px solid #00ff0004;
+      border-radius: 8px;
+      height: 150px;
+      width: 300px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 220px;
+    }
+
+    .game-over-text {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 32px;
+      color: red;
+      margin-bottom: 20px;
+      margin-top: 10px;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+
+    .confirm-btn {
+      background: #0099ff;
+      color: white;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 32px;
+      font-weight: bold;
+      box-shadow: 0 2px 8px #333;
+      cursor: pointer;
+      margin-top: 0px;
+      letter-spacing: 2px;
+      transition: background 0.2s;
+    }
+
+    .confirm-btn:hover {
+      background: #0077cc;
+    }
+
+   .message-overlay {
+     position: absolute;
+     top: 0;
+     left: 0;
+     width: 100%;
+     height: 100%;
+     background: rgba(0,0,0,0.7);
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     z-index: 101;
+   }
+
+   .message-box {
+    background: #161616f3;
+    border: 5px solid #00ff0004;
+    border-radius: 8px;
+    height: 220px;
+    width: 340px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 220px;
+   }
+
+   .message-title {
+     font-family: 'Press Start 2P', monospace;
+     font-size: 20px;
+     color: #ffee00;
+     margin-top: 18px;
+     margin-bottom: 10px;
+     text-align: center;
+     letter-spacing: 2px;
+   }
+
+   .message-body {
+     font-family: 'Press Start 2P', monospace;
+     font-size: 14px;
+     color: #39FF14;
+     margin-bottom: 10px;
+     text-align: center;
+     line-height: 1.6;
+   }
+
+   .message-love {
+     font-family: 'Press Start 2P', monospace;
+     font-size: 16px;
+     color: #ff69b4;
+     margin-bottom: 10px;
+     text-align: center;
+     letter-spacing: 2px;
+   }
+
+   .ok-btn {
+     background: #0099ff;
+     color: white;
+     font-family: 'Press Start 2P', monospace;
+     font-size: 16px;
+     border: none;
+     border-radius: 6px;
+     padding: 10px 32px;
+     font-weight: bold;
+     box-shadow: 0 2px 8px #333;
+     cursor: pointer;
+     margin-top: 8px;
+     letter-spacing: 2px;
+     transition: background 0.2s;
+   }
+
+   .ok-btn:hover {
+     background: #0077cc;
+   }
+
+  </style>
+</head>
+<body>
+  <canvas id="starfield"></canvas>
+  <audio id="dragSound" src="drag.mp3" preload="auto"></audio>
+  <audio id="placeSound" src="place.mp3" preload="auto"></audio>
+  <audio id="breakSound" src="break.mp3" preload="auto"></audio>
+  <audio id="clickSound" src="click.wav" preload="auto"></audio>
+  <audio id="gameOverSound" src="game-over.wav" preload="auto"></audio>
+  <div class="gameboy-frame">
+    <div class="screen">
+      <div class="header">
+        <h1>Block Game</h1>
+      </div>
+      <div class="scoreboard">
+        <div>Score: <span id="score">0</span></div>
+        <div>Highscore: <span id="highscore">0</span></div>
+      </div>
+      <div class="grid" id="grid"></div>
+      <div class="block-area" id="blockArea"></div>
+      <div id="gameOverOverlay" class="game-over-overlay" style="display:none;">
+        <div class="game-over-box">
+          <div class="game-over-text">GAME OVER</div>
+          <button class="confirm-btn" id="confirmGameOver">CONFIRM</button>
+        </div>
+      </div>
+      <div id="messageOverlay" class="message-overlay" style="display:none;">
+        <div class="message-box">
+          <div class="message-title">INGET YA!</div>
+          <div class="message-body">walaupun kamu kalah,<br>tapi kamu selalu menang kok di hati aku, HEHE</div>
+          <div class="message-love">I LOVE YOU!</div>
+          <button class="ok-btn" id="okMessage">OK</button>
+        </div>
+      </div>
+    </div>
+    <button class="back-btn" onclick="goBack()">KEMBALI</button>
+  </div>
+
+  <script>
+  const grid = document.getElementById('grid');
+  const scoreSpan = document.getElementById('score');
+  const highscoreSpan = document.getElementById('highscore');
+  const blockArea = document.getElementById('blockArea'); 
+
+  let score = 0;
+  let highscore = localStorage.getItem('highscore') || 0;
+  highscoreSpan.textContent = highscore;
+
+  function createGrid() {
+    grid.innerHTML = '';
+    for (let i = 0; i < 64; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      grid.appendChild(cell);
+    }
+  }
+
+  const blockShapes = {
+    I: { color: 'I', shape: [[1], [1], [1], [1]], columns: 1 },
+    O: { color: 'O', shape: [[1, 1], [1, 1]], columns: 2 },
+    L: { color: 'L', shape: [[1, 0], [1, 0], [1, 1]], columns: 2 },
+    J: { color: 'J', shape: [[0, 1], [0, 1], [1, 1]], columns: 2 },
+    T: { color: 'T', shape: [[0, 1, 0], [1, 1, 1]], columns: 3 },
+    S: { color: 'S', shape: [[0, 1, 1], [1, 1, 0]], columns: 3 },
+    Z: { color: 'Z', shape: [[1, 1, 0], [0, 1, 1]], columns: 3 },
+  };
+
+  function createBlockElement(type) {
+    const { color, shape, columns } = blockShapes[type];
+    const block = document.createElement('div');
+    block.className = 'draggable-block';
+    block.dataset.type = type;
+    block.dataset.columns = columns;
+    block.dataset.rows = shape.length;
+    block.dataset.shape = JSON.stringify(shape);
+    block.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+    block.style.gridTemplateRows = `repeat(${shape.length}, 1fr)`;
+    const colorClasses = ['block-pink', 'block-red', 'block-blue', 'block-green', 'block-yellow'];
+    const chosenColor = colorClasses[Math.floor(Math.random() * colorClasses.length)];
+    block.dataset.blockColor = chosenColor;
+    shape.forEach(row => {
+      row.forEach(cell => {
+        const div = document.createElement('div');
+        div.classList.add('block-cell');
+        if (cell) {
+          div.classList.add(chosenColor);
+        } else {
+          div.style.visibility = 'hidden';
+        }
+        block.appendChild(div);
+      });
+    });
+    block.addEventListener('mousedown', e => startDrag(e, block));
+    block.addEventListener('touchstart', e => startDrag(e, block));
+    return block;
+  }
+
+  function createMultipleBlocks() {
+    blockArea.innerHTML = '';
+    for (let i = 0; i < 3; i++) {
+      const keys = Object.keys(blockShapes);
+      const type = keys[Math.floor(Math.random() * keys.length)];
+      const block = createBlockElement(type);
+      blockArea.appendChild(block);
+    }
+  }
+
+  let offsetX, offsetY, currentBlock, startBlockX, startBlockY;
+  function startDrag(e, targetBlock) {
+    e.preventDefault();
+    const dragSound = document.getElementById('dragSound');
+    if (dragSound) {
+      dragSound.currentTime = 0;
+      dragSound.play();
+    }
+    currentBlock = targetBlock;
+    const blockRect = targetBlock.getBoundingClientRect();
+    const parentRect = blockArea.getBoundingClientRect();
+    const startX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
+    const startY = e.type === 'mousedown' ? e.clientY : e.touches[0].clientY;
+    let dragClone = currentBlock.cloneNode(true);
+    dragClone.style.position = 'fixed';
+    dragClone.style.zIndex = 1000;
+    dragClone.style.left = blockRect.left + 'px';
+    dragClone.style.top = blockRect.top + 'px';
+    dragClone.style.pointerEvents = 'auto';
+    Array.from(dragClone.getElementsByClassName('block-cell')).forEach(cell => {
+      cell.style.width = '38px';
+      cell.style.height = '38px';
+    });
+    document.body.appendChild(dragClone);
+    const dragRect = dragClone.getBoundingClientRect();
+    const relX = (startX - blockRect.left) / blockRect.width;
+    const relY = (startY - blockRect.top) / blockRect.height;
+    offsetX = relX * dragRect.width;
+    offsetY = relY * dragRect.height;
+    currentBlock.style.pointerEvents = 'none';
+    const moveEvent = e.type === 'mousedown' ? 'mousemove' : 'touchmove';
+    const endEvent = e.type === 'mousedown' ? 'mouseup' : 'touchend';
+
+    function dragMove(ev) {
+      const x = ev.type === 'mousemove' ? ev.clientX : ev.touches[0].clientX;
+      const y = ev.type === 'mousemove' ? ev.clientY : ev.touches[0].clientY;
+      dragClone.style.left = (x - offsetX) + 'px';
+      dragClone.style.top = (y - offsetY) + 'px';
+    }
+
+    function dragEnd(ev) {
+      document.removeEventListener(moveEvent, dragMove);
+      document.removeEventListener(endEvent, dragEnd);
+      currentBlock.style.pointerEvents = 'auto';
+      Array.from(currentBlock.getElementsByClassName('block-cell')).forEach(cell => {
+        cell.style.width = '';
+        cell.style.height = '';
+      });
+      const gridRect = grid.getBoundingClientRect();
+      const blockRect = dragClone.getBoundingClientRect();
+      const gridX = Math.round((blockRect.left - gridRect.left) / (gridRect.width / 8));
+      const gridY = Math.round((blockRect.top - gridRect.top) / (gridRect.height / 8));
+      const shape = JSON.parse(currentBlock.dataset.shape);
+      if (canPlaceBlock(gridX, gridY, shape)) {
+        placeBlock(gridX, gridY, shape, currentBlock.dataset.type);
+        currentBlock.remove();
+        dragClone.remove();
+        setTimeout(() => {
+          checkAndClearLines();
+          if (blockArea.children.length === 0) {
+            createMultipleBlocks();
+          }
+          checkGameOver();
+        }, 200);
+      } else {
+        dragClone.remove();
+      }
+    }
+    document.addEventListener(moveEvent, dragMove);
+    document.addEventListener(endEvent, dragEnd);
+  }
+
+  let gridState = Array(8).fill(0).map(() => Array(8).fill(null));
+
+  function canPlaceBlock(x, y, shape) {
+    for (let i = 0; i < shape.length; i++) {
+      for (let j = 0; j < shape[i].length; j++) {
+        if (shape[i][j]) {
+          const gx = x + j;
+          const gy = y + i;
+          if (gx < 0 || gx >= 8 || gy < 0 || gy >= 8) return false;
+          if (gridState[gy][gx]) return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  function placeBlock(x, y, shape, type) {
+    let blockCount = 0;
+    let blockColor = null;
+    if (currentBlock && currentBlock.dataset.blockColor) {
+      blockColor = currentBlock.dataset.blockColor;
+    }
+    for (let i = 0; i < shape.length; i++) {
+      for (let j = 0; j < shape[i].length; j++) {
+        if (shape[i][j]) {
+          const gx = x + j;
+          const gy = y + i;
+          gridState[gy][gx] = { type, color: blockColor };
+          blockCount++;
+        }
+      }
+    }
+
+    const placeSound = document.getElementById('placeSound');
+    if (placeSound) {
+      placeSound.currentTime = 0;
+      placeSound.play();
+    }
+
+    score += blockCount;
+    scoreSpan.textContent = score;
+    renderGrid();
+  }
+
+  function renderGrid() {
+    Array.from(grid.children).forEach((cell, idx) => {
+      const x = idx % 8;
+      const y = Math.floor(idx / 8);
+      cell.className = 'cell';
+      const gridVal = gridState[y][x];
+      if (gridVal) {
+        if (typeof gridVal === 'object' && gridVal.color) {
+          cell.classList.add(gridVal.color);
+        } else if (typeof gridVal === 'string') {
+          cell.classList.add(gridVal);
+        }
+      }
+    });
+  }
+
+  function checkAndClearLines() {
+    let clearedRows = [];
+    let clearedCols = [];
+    for (let y = 0; y < 8; y++) {
+      if (gridState[y].every(cell => cell)) {
+        gridState[y] = Array(8).fill(null);
+        clearedRows.push(y);
+      }
+    }
+    for (let x = 0; x < 8; x++) {
+      if (gridState.every(row => row[x])) {
+        for (let y = 0; y < 8; y++) gridState[y][x] = null;
+        clearedCols.push(x);
+      }
+    }
+    let bonus = 0;
+    if (clearedRows.length > 0) bonus += 8 * clearedRows.length;
+    if (clearedCols.length > 0) bonus += 8 * clearedCols.length;
+    if (clearedRows.length > 0 || clearedCols.length > 0) {
+      const breakSound = document.getElementById('breakSound');
+      if (breakSound) {
+        breakSound.currentTime = 0;
+        breakSound.play();
+      }
+    }
+    if (bonus > 0) {
+      score += bonus;
+      scoreSpan.textContent = score;
+    }
+    if (bonus > 0 || clearedRows.length > 0 || clearedCols.length > 0) {
+      if (score > highscore) {
+        highscore = score;
+        highscoreSpan.textContent = highscore;
+        localStorage.setItem('highscore', highscore);
+      }
+      renderGrid();
+    }
+  }
+
+  function checkGameOver() {
+    const blocks = Array.from(blockArea.children);
+    let possible = false;
+    for (const block of blocks) {
+      const shape = JSON.parse(block.dataset.shape);
+      for (let y = 0; y < 8; y++) {
+        for (let x = 0; x < 8; x++) {
+          if (canPlaceBlock(x, y, shape)) {
+            possible = true;
+            break;
+          }
+        }
+        if (possible) break;
+      }
+      if (possible) break;
+    }
+    if (!possible) {
+      setTimeout(() => {
+        const gameOverSound = document.getElementById('gameOverSound');
+        if (gameOverSound) {
+          gameOverSound.currentTime = 0;
+          gameOverSound.play();
+        }
+        document.getElementById('gameOverOverlay').style.display = 'flex';
+      }, 300);
+    }
+  }
+
+  function goBack() {
+    const clickSound = document.getElementById('clickSound');
+    if (clickSound) {
+      clickSound.currentTime = 0;
+      clickSound.play();
+    }
+    window.location.href = 'music.html';
+  }
+
+  createGrid();
+  createMultipleBlocks();
+  window.addEventListener('DOMContentLoaded', function() {
+    const gameOverOverlay = document.getElementById('gameOverOverlay');
+    const confirmBtn = document.getElementById('confirmGameOver');
+    const messageOverlay = document.getElementById('messageOverlay');
+    const okBtn = document.getElementById('okMessage');
+    const clickSound = document.getElementById('clickSound');
+    function playClickSound() {
+      if (clickSound) {
+        clickSound.currentTime = 0;
+        clickSound.play();
+      }
+    }
+    if (confirmBtn) {
+      confirmBtn.onclick = function() {
+        playClickSound();
+        gameOverOverlay.style.display = 'none';
+        messageOverlay.style.display = 'flex';
+      };
+    }
+    if (okBtn) {
+      okBtn.onclick = function() {
+        playClickSound();
+        messageOverlay.style.display = 'none';
+        score = 0;
+        gridState = Array(8).fill(0).map(() => Array(8).fill(null));
+        renderGrid();
+        scoreSpan.textContent = score;
+        createMultipleBlocks();
+      };
+    }
+  });
+
+  const canvas = document.getElementById("starfield");
+  const ctx = canvas.getContext("2d");
+  let stars = [];
+  const numStars = 100;
+
+  function initStars() {
+    stars = [];
+    for (let i = 0; i < numStars; i++) {
+      stars.push({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        radius: Math.random() * 1.2,
+        alpha: Math.random(),
+        delta: Math.random() * 0.02
+      });
+    }
+  }
+
+  function drawStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let star of stars) {
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.radius, 0, 2 * Math.PI);
+      ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+      ctx.fill();
+      star.alpha += star.delta;
+      if (star.alpha <= 0 || star.alpha >= 1) {
+        star.delta = -star.delta;
+      }
+    }
+  }
+
+  function animate() {
+    drawStars();
+    requestAnimationFrame(animate);
+  }
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    initStars();
+  }
+
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+  animate();
+  </script>
+</body>
+</html>
